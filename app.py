@@ -5,24 +5,32 @@ import numpy as np
 
 app = Flask(__name__)
 
-# Cargar el modelo
+# Cargar el modelo entrenado
 try:
+    # Asegúrate de que el archivo joblib esté en la carpeta 'model'
     model = joblib.load('model/clustering_model.joblib')
 except FileNotFoundError:
-    print("Error: El archivo 'model/clustering_model.joblib' no fue encontrado.")
-    print("Por favor, ejecuta el notebook 'Clustering_Model.ipynb' para generar el modelo.")
     model = None
 
-# Definir las interpretaciones de los clusters
+# Definir las interpretaciones médicas basadas en el análisis de centroides
 interpretations = {
-    0: "Este perfil corresponde a un grupo con una tasa de suicidios SUPERIOR a la media. Se considera de ALTO RIESGO y requiere atención prioritaria.",
-    1: "Este perfil corresponde a un grupo con una tasa de suicidios INFERIOR a la media. Se considera de BAJO RIESGO, aunque no se debe descartar la vigilancia."
+    0: {
+        "title": "Grupo de Carga de Enfermedad Crónica",
+        "risk_level": "Alto Riesgo Fisiológico / Riesgo Medio Suicida",
+        "desc": "Este paciente/región pertenece a un grupo con alta probabilidad de muerte prematura por enfermedades cardiovasculares, cáncer o diabetes (~25%).",
+        "action": "Priorizar control de enfermedades crónicas. Mantener vigilancia estándar en salud mental."
+    },
+    1: {
+        "title": "Grupo de Riesgo de Salud Mental Latente",
+        "risk_level": "Bajo Riesgo Fisiológico / Riesgo Aumentado Suicida",
+        "desc": "Este perfil presenta buena salud física general, pero estadísticas de suicidio superiores a la media del otro grupo (~13 por 100k).",
+        "action": "ALERTA: Enfocar recursos en prevención del suicidio y bienestar psicológico. El buen estado físico puede enmascarar cuadros depresivos."
+    }
 }
 
-# Nombres de las columnas como se esperan en el modelo
-# Extraídos del notebook, después de cargar X_train con index_col=0
+# Columnas requeridas por el modelo (Basado en tu X_train)
 model_columns = [
-    'unnamed:_1',
+    'unnamed:_1', # Año/Índice temporal
     'probability_(%)_of_dying_between_age_30_and_exact_age_70_from_any_of_cardiovascular_disease,_cancer,_diabetes,_or_chronic_respiratory_disease',
     'probability_(%)_of_dying_between_age_30_and_exact_age_70_from_any_of_cardiovascular_disease,_cancer,_diabetes,_or_chronic_respiratory_disease.1',
     'probability_(%)_of_dying_between_age_30_and_exact_age_70_from_any_of_cardiovascular_disease,_cancer,_diabetes,_or_chronic_respiratory_disease.2',
@@ -32,42 +40,43 @@ model_columns = [
 
 @app.route('/')
 def home():
+    # Renderiza el formulario HTML
     return render_template('index.html')
 
 @app.route('/predict', methods=['POST'])
 def predict():
     if model is None:
-        return "Error: El modelo no está cargado. Ejecuta el notebook para generarlo.", 500
+        return "Error: Modelo no encontrado. Ejecuta el notebook para crear el archivo .joblib", 500
 
     try:
-        # Recolectar los datos del formulario
-        form_data = request.form.to_dict()
+        # Recolectar datos
+        input_data = []
+        for col in model_columns:
+            val = request.form.get(col)
+            if val is None:
+                return f"Falta el valor para: {col}", 400
+            input_data.append(float(val))
         
-        # Convertir los datos a un array de numpy en el orden correcto
-        input_data = [float(form_data[col]) for col in model_columns]
-        
-        # Crear un DataFrame para la predicción
+        # Crear DataFrame
         input_df = pd.DataFrame([input_data], columns=model_columns)
         
-        # Realizar la predicción
-        prediction = model.predict(input_df)
-        cluster = prediction[0]
+        # Predecir
+        cluster = int(model.predict(input_df)[0])
         
-        # Obtener la interpretación
-        interpretation = interpretations.get(cluster, "No se encontró una interpretación para este cluster.")
+        # Obtener interpretación
+        result_info = interpretations.get(cluster, {"title": "Desconocido", "desc": "Sin datos"})
         
-        return render_template('result.html', cluster=cluster, interpretation=interpretation)
+        return render_template(
+            'result.html', 
+            cluster=cluster, 
+            title=result_info['title'],
+            risk=result_info['risk_level'],
+            description=result_info['desc'],
+            action=result_info['action']
+        )
 
     except Exception as e:
-        return f"Ocurrió un error durante la predicción: {e}", 400
+        return f"Error en la predicción: {str(e)}", 400
 
 if __name__ == '__main__':
-    # Verificar si el modelo existe antes de correr la app
-    try:
-        joblib.load('model/clustering_model.joblib')
-        print("✓ Modelo encontrado. Iniciando la aplicación Flask...")
-        app.run(debug=True)
-    except FileNotFoundError:
-        print("✗ Error Crítico: No se puede iniciar la aplicación porque el modelo 'model/clustering_model.joblib' no existe.")
-        print("→ Por favor, abre y ejecuta todas las celdas del notebook 'Clustering_Model.ipynb' para crearlo.")
-
+    app.run(debug=True, port=5000)
