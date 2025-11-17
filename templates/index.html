@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis de Riesgo de Suicidio</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background-color: #f4f7f6;
+        }
+        h1, h2 {
+            color: #005f73;
+        }
+        form {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+        input[type="number"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        input[type="number"]:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        button {
+            grid-column: 1 / -1;
+            background-color: #005f73;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #003e4d;
+        }
+    </style>
+</head>
+<body>
+    <h1>Clasificador de Perfiles de Riesgo</h1>
+    <p>Introduce los datos demográficos y de salud para determinar el cluster de riesgo asociado.</p>
+    
+    <form action="/predict" method="post">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="year">Año</label>
+                <input type="number" id="year" name="unnamed:_1" step="1" value="2016" required>
+            </div>
+
+            <div class="form-group">
+                <label for="prob_death_male">Prob. de Muerte (Hombres, %)</label>
+                <input type="number" id="prob_death_male" name="probability_(%)_of_dying_between_age_30_and_exact_age_70_from_any_of_cardiovascular_disease,_cancer,_diabetes,_or_chronic_respiratory_disease.1" step="0.1" value="21.0" required>
+            </div>
+
+            <div class="form-group">
+                <label for="prob_death_female">Prob. de Muerte (Mujeres, %)</label>
+                <input type="number" id="prob_death_female" name="probability_(%)_of_dying_between_age_30_and_exact_age_70_from_any_of_cardiovascular_disease,_cancer,_diabetes,_or_chronic_respiratory_disease.2" step="0.1" value="18.0" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="prob_death_both">Prob. de Muerte (Ambos Sexos, %)</label>
+                <input type="number" id="prob_death_both" name="probability_(%)_of_dying_between_age_30_and_exact_age_70_from_any_of_cardiovascular_disease,_cancer,_diabetes,_or_chronic_respiratory_disease" step="0.1" value="19.4" required>
+            </div>
+
+            <div class="form-group">
+                <label for="suicide_male">Tasa Suicidio (Hombres, por 100k)</label>
+                <input type="number" id="suicide_male" name="crude_suicide_rates_(per_100_000_population).1" step="0.1" value="10.8" required>
+            </div>
+
+            <div class="form-group">
+                <label for="suicide_female">Tasa Suicidio (Mujeres, por 100k)</label>
+                <input type="number" id="suicide_female" name="crude_suicide_rates_(per_100_000_population).2" step="0.1" value="1.6" required>
+            </div>
+        </div>
+        <br>
+        <button type="submit">Clasificar Perfil</button>
+    </form>
+</body>
+</html>

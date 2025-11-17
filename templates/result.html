@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Resultado del Análisis</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background-color: #f4f7f6;
+            text-align: center;
+        }
+        .result-container {
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #005f73;
+        }
+        .cluster-number {
+            font-size: 4em;
+            font-weight: bold;
+            color: #ee9b00;
+            margin: 20px 0;
+        }
+        .interpretation {
+            font-size: 1.2em;
+            color: #003e4d;
+            margin-bottom: 30px;
+        }
+        a {
+            display: inline-block;
+            background-color: #005f73;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        a:hover {
+            background-color: #003e4d;
+        }
+    </style>
+</head>
+<body>
+    <div class="result-container">
+        <h1>Resultado del Análisis</h1>
+        <p>El perfil ingresado ha sido clasificado en el siguiente grupo:</p>
+        <h2>Cluster</h2>
+        <div class="cluster-number">{{ cluster }}</div>
+        <h2>Interpretación</h2>
+        <p class="interpretation">{{ interpretation }}</p>
+        <a href="/">Realizar otro análisis</a>
+    </div>
+</body>
+</html>
